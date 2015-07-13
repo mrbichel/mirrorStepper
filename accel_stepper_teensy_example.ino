@@ -107,6 +107,15 @@ float targetY;
 void loop() {  
    
    while (parser::read(100)) {
+
+     if (parser::nextTokenIf("a")) {
+       float a = parser::nextToken().toFloat();
+       
+       pan.stp.setAcceleration(a);
+       tilt.stp.setAcceleration(a);
+        
+     }
+
      
      if (parser::nextTokenIf("s")) {
        float s = parser::nextToken().toFloat();
