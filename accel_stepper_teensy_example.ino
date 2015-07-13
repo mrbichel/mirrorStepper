@@ -77,25 +77,25 @@ StepperDriver  pan(4,7,19,18,17);
 
 float targetX;
 float targetY;
-int resolution = 8;
+float resolution = 8;
+int long lastMessageTime;
 
 void setup() {
   
   Serial.begin(38400);
   
-  tilt.stp.setMaxSpeed(4000);
-  pan.stp.setMaxSpeed(4000);
+  tilt.stp.setMaxSpeed(800);
+  pan.stp.setMaxSpeed(800);
   
-  tilt.stp.setAcceleration(2000.0);
-  pan.stp.setAcceleration(2000.0);
-  pan.stp.setSpeed(400);
-  tilt.stp.setSpeed(400);
+  tilt.stp.setAcceleration(200.0);
+  pan.stp.setAcceleration(200.0);
   
-   tilt.setMicroStepResolution(1);
-   pan.setMicroStepResolution(1);
+  tilt.setMicroStepResolution(1);
+  pan.setMicroStepResolution(1);
    
-   tilt.stp.runToNewPosition(30);
-   pan.stp.runToNewPosition(90);
+   // reset
+  tilt.stp.runToNewPosition(30);
+  pan.stp.runToNewPosition(90); 
   
   tilt.stp.runToNewPosition(0);
   pan.stp.runToNewPosition(0);
@@ -106,10 +106,13 @@ void setup() {
 }
 
 
+
 void loop() {  
    
    while (parser::read(100)) {
-
+    
+     lastMessageTime = millis();
+     
      if (parser::nextTokenIf("m")) {
        int res = parser::nextToken().toInt();
        pan.setMicroStepResolution(res);
@@ -144,12 +147,24 @@ void loop() {
         targetX = x;
         targetY = y;
         
-        tilt.stp.moveTo(y*8.0);
-        pan.stp.moveTo(x*8.0);
+        tilt.stp.moveTo(y*resolution*1.0f);
+        pan.stp.moveTo(x*resolution*1.0f);
         
       }
     }
   }
+  
+  if(false && millis() - lastMessageTime > 5000) {
+    
+    if(tilt.stp.distanceToGo() == 0) {
+      tilt.stp.moveTo(random(0,30.0*resolution*1.0f)); 
+    }
+    
+    if(pan.stp.distanceToGo() == 0) {
+      pan.stp.moveTo(random(0,90.0*resolution*1.0f));
+    }  
+  }
+  
   
   tilt.stp.run(); //runSpeed
   pan.stp.run();
