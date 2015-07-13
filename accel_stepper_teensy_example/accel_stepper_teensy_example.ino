@@ -74,11 +74,11 @@ StepperDriver tilt(3,6,16,15,14);
 StepperDriver  pan(4,7,19,18,17);
 
 void setup() {
-  tilt.stp.setMaxSpeed(80);
-  pan.stp.setMaxSpeed(80);
+  tilt.stp.setMaxSpeed(1000);
+  pan.stp.setMaxSpeed(1000);
   
-  tilt.stp.setAcceleration(80.0);
-  pan.stp.setAcceleration(80.0);
+  tilt.stp.setAcceleration(100.0);
+  pan.stp.setAcceleration(100.0);
   pan.stp.setSpeed(20);
   tilt.stp.setSpeed(20);
   
@@ -88,8 +88,8 @@ void setup() {
    tilt.stp.runToNewPosition(30);
    pan.stp.runToNewPosition(90);
   
-  //tilt.stp.runToNewPosition(30);
-  //pan.stp.runToNewPosition(90);
+  tilt.stp.runToNewPosition(0);
+  pan.stp.runToNewPosition(0);
 }
 
 void loop() {  
@@ -109,23 +109,13 @@ void loop() {
 
   // Parser test end
    
-     tilt.setMicroStepResolution(16);
-   pan.setMicroStepResolution(16);
-   
-   
-   tilt.stp.runToNewPosition(30);
-   tilt.stp.runToNewPosition(0);
-   
-   pan.stp.runToNewPosition(90);
-   pan.stp.runToNewPosition(0);
-   
    tilt.setMicroStepResolution(1);
    pan.setMicroStepResolution(1);
    
    tilt.stp.runToNewPosition(30);
    tilt.stp.runToNewPosition(0);
   
-   pan.stp.runToNewPosition(90);
+   pan.stp.runToNewPosition(89);
    pan.stp.runToNewPosition(0);
    
    
@@ -135,17 +125,17 @@ void loop() {
    tilt.stp.runToNewPosition(30*2);
    tilt.stp.runToNewPosition(0);
    
-   pan.stp.runToNewPosition(90*2);
+   pan.stp.runToNewPosition(90*2-1);
    pan.stp.runToNewPosition(0);
    
    
-   tilt.setMicroStepResolution(4);
+  tilt.setMicroStepResolution(4);
    pan.setMicroStepResolution(4);
    
     tilt.stp.runToNewPosition(30*4);
    tilt.stp.runToNewPosition(0);
   
-   pan.stp.runToNewPosition(90*4);
+   pan.stp.runToNewPosition(90*4-1);
    pan.stp.runToNewPosition(0);
    
    
@@ -155,8 +145,9 @@ void loop() {
      tilt.stp.runToNewPosition(30*8);
       tilt.stp.runToNewPosition(0);
       
-      pan.stp.runToNewPosition(90*8);
+      pan.stp.runToNewPosition(90*8-1);
    pan.stp.runToNewPosition(0);
+   
    
    
    tilt.setMicroStepResolution(16);
@@ -165,9 +156,8 @@ void loop() {
    tilt.stp.runToNewPosition(30*16);
    tilt.stp.runToNewPosition(0);
    
-   pan.stp.runToNewPosition(90*16);
+   pan.stp.runToNewPosition(90*16-1);
    pan.stp.runToNewPosition(0);
-   
    
    
    /*pan.stp.moveTo(15);
