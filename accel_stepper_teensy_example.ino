@@ -93,6 +93,21 @@ void setup() {
 }
 
 void loop() {  
+
+  // Parser test begin
+
+  while (parser::read(100)) {
+    if (parser::nextTokenIf("p")) {
+      int x = parser::nextToken().toInt();
+      int y = parser::nextToken().toInt();
+
+      if (x >= 0 && x <= 30 && y >= 0 && y <= 90) {
+        Serial.println("Position: " + String(x) + ", " + String(y));
+      }
+    }
+  }
+
+  // Parser test end
    
      tilt.setMicroStepResolution(16);
    pan.setMicroStepResolution(16);
