@@ -74,6 +74,11 @@ protected:
 StepperDriver tilt(3,6,16,15,14);
 StepperDriver  pan(4,7,19,18,17);
 
+
+float targetX;
+float targetY;
+int resolution = 8;
+
 void setup() {
   
   Serial.begin(38400);
@@ -95,25 +100,28 @@ void setup() {
   tilt.stp.runToNewPosition(0);
   pan.stp.runToNewPosition(0);
   
-  
-   tilt.setMicroStepResolution(8);
-   pan.setMicroStepResolution(8);
+   tilt.setMicroStepResolution(resolution);
+   pan.setMicroStepResolution(resolution);
    
 }
 
-float targetX;
-float targetY;
 
 void loop() {  
    
    while (parser::read(100)) {
 
+     if (parser::nextTokenIf("m")) {
+       int res = parser::nextToken().toInt();
+       pan.setMicroStepResolution(res);
+       tilt.setMicroStepResolution(res);
+       resolution = res;
+     }
+     
+     
      if (parser::nextTokenIf("a")) {
        float a = parser::nextToken().toFloat();
-       
        pan.stp.setAcceleration(a);
        tilt.stp.setAcceleration(a);
-        
      }
 
      
