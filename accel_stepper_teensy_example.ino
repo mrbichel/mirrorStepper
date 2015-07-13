@@ -109,10 +109,10 @@ void loop() {
    while (parser::read(100)) {
      
      if (parser::nextTokenIf("s")) {
-       int s = parser::nextToken().toInt();
+       float s = parser::nextToken().toFloat();
        
-       //pan.stp.setSpeed(s);
-       //tilt.stp.setSpeed(s);
+       pan.stp.setMaxSpeed(s);
+       tilt.stp.setMaxSpeed(s);
         
      }
            
