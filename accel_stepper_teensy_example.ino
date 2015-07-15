@@ -16,7 +16,7 @@ public:
     microstepPins[0] = msg1Pin;
     microstepPins[1] = msg2Pin;
     microstepPins[2] = msg3Pin;
-    microStepRes = 0;
+    microStepRes = 8;
     microStepStates[0] = LOW;
     microStepStates[1] = LOW;
     microStepStates[2] = LOW;
@@ -29,7 +29,7 @@ public:
   
 
   
-  void setMicroStepResolution(int res) { // 2, 4, 8, 16
+  void setMicroStepResolution(int res) { //1, 2, 4, 8, 16
     
     if(res == 1) {
       setMicroStepStates(LOW, LOW, LOW);
@@ -43,15 +43,26 @@ public:
       setMicroStepStates(HIGH, HIGH, HIGH);
     }
     
+    // don't forget where we are
+    int newStepTarget = (stp.targetPosition()/microStepRes)*res;
+    int newCurrentPositon = (stp.currentPosition()/microStepRes)*res;
+    
+    stp.setCurrentPosition(newCurrentPositon);
+    stp.moveTo(newStepTarget);    
+    
     microStepRes = res;
     writeMicroStepPins();
-
+    
   }
   
   void writeMicroStepPins() {
     for(int i=0; i<3; i++) {
        digitalWrite(microstepPins[i], microStepStates[i]);
     }
+  }
+  
+  void moveTo(float angle) {
+    stp.moveTo(angle*microStepRes*1.0f);
   }
   
   AccelStepper stp;
@@ -74,38 +85,42 @@ protected:
 StepperDriver tilt(3,6,16,15,14);
 StepperDriver  pan(4,7,19,18,17);
 
-
 float targetX;
 float targetY;
-float resolution = 8;
-int long lastMessageTime;
+float resolution = 16;
+unsigned int long lastMessageTime;
+
+unsigned int long lastSpeedChangeTime;
+unsigned int long lastTargetChangeTime;
 
 void setup() {
   
   Serial.begin(38400);
+  reset();
+   
+}
+
+void reset() {
   
-  tilt.stp.setMaxSpeed(800);
-  pan.stp.setMaxSpeed(800);
+  tilt.stp.setMaxSpeed(4000);
+  pan.stp.setMaxSpeed(4000);
   
-  tilt.stp.setAcceleration(200.0);
-  pan.stp.setAcceleration(200.0);
+  tilt.stp.setAcceleration(400.0);
+  pan.stp.setAcceleration(400.0);
   
   tilt.setMicroStepResolution(1);
   pan.setMicroStepResolution(1);
    
-   // reset
+  // reset
   tilt.stp.runToNewPosition(30);
   pan.stp.runToNewPosition(90); 
-  
   tilt.stp.runToNewPosition(0);
   pan.stp.runToNewPosition(0);
   
-   tilt.setMicroStepResolution(resolution);
-   pan.setMicroStepResolution(resolution);
-   
+  tilt.setMicroStepResolution(resolution);
+  pan.setMicroStepResolution(resolution);
+
 }
-
-
 
 void loop() {  
    
@@ -119,7 +134,6 @@ void loop() {
        tilt.setMicroStepResolution(res);
        resolution = res;
      }
-     
      
      if (parser::nextTokenIf("a")) {
        float a = parser::nextToken().toFloat();
@@ -141,30 +155,66 @@ void loop() {
       float x = parser::nextToken().toFloat();
       float y = parser::nextToken().toFloat();
 
-
       if (x >= 0 && x <= 90*16 && y >= 0 && y <= 90*16) {
-        Serial.println("Position: " + String(x) + ", " + String(y));
+        //Serial.println("Position: " + String(x) + ", " + String(y));
         targetX = x;
         targetY = y;
         
-        tilt.stp.moveTo(y*resolution*1.0f);
-        pan.stp.moveTo(x*resolution*1.0f);
+        tilt.moveTo(y);
+        pan.moveTo(x);
         
       }
     }
   }
   
-  if(false && millis() - lastMessageTime > 5000) {
+  if(millis() - lastMessageTime > 15000) {
     
-    if(tilt.stp.distanceToGo() == 0) {
-      tilt.stp.moveTo(random(0,30.0*resolution*1.0f)); 
+    
+    if(millis() - lastSpeedChangeTime > 4000) {
+      
+        tilt.stp.setMaxSpeed(random(10,600));
+        tilt.stp.setAcceleration(random(2,400));
+      
+        pan.stp.setMaxSpeed(random(10,600));
+        pan.stp.setAcceleration(random(2,400));
+        
+        tilt.setMicroStepResolution(pow(2,random(4)));
+        pan.setMicroStepResolution(pow(2,random(4)));
+        
+        lastSpeedChangeTime = millis();
+        
+    }
+    
+    
+    if(millis() - lastTargetChangeTime > 30000) {
+      
+      tilt.moveTo(random(0,29.0));
+      pan.moveTo(random(0,89.0));
+      
+      lastTargetChangeTime = millis() + random(15000);
+    
+    }
+    
+    
+    
+    
+    
+    if(tilt.stp.distanceToGo() == 0 && pan.stp.distanceToGo() == 0) {
+      
+      //lastTargetChangeTime = millis();
+      //tilt.moveTo(random(0,29.0));
+      //pan.moveTo(random(0,89.0));
+      //tilt.setMicroStepResolution(pow(2,random(4)));
+
     }
     
     if(pan.stp.distanceToGo() == 0) {
-      pan.stp.moveTo(random(0,90.0*resolution*1.0f));
+      //pan.moveTo(random(0,89.0));
+      //tilt.moveTo(random(0,29.0));
+      //pan.setMicroStepResolution(pow(2,random(4)));
+      
     }  
   }
-  
   
   tilt.stp.run(); //runSpeed
   pan.stp.run();
